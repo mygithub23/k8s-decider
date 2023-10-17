@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: decider-db
+  labels:
+    app: decider-db
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: decider-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: decider-db
+    spec:
+      restartPolicy: Always    
+      containers:
+        - name: decider-db
+          image: madkar777/decider-db:v4
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+          ports:
+            - name:  postgres
+              containerPort: 5432
+              protocol: TCP
+              
+          env:
+            - name: FULL_BUILD_MODE
+              value: preserve
+            - name: DB_HOSTNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: DB_HOSTNAME
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: DB_DATABASE
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: DB_USERNAME                  
+            - name: DB_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: DB_PASSWORD
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: DB_PORT
+            - name: ADMIN_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: ADMIN_EMAIL                  
+            - name: ADMIN_PASS
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: ADMIN_PASS                  
+            - name: CART_ENC_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: CART_ENC_KEY
+            - name: WEB_HTTPS_ON
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: WEB_HTTPS_ON                                                  
+            - name: WEB_IP
+              valueFrom:
+                configMapKeyRef:
+                  key: WEB_PORT
+                  name: env-configmap
+            - name: WEB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: WEB_HTTPS_ON
+                  name: env-configmap                    
+          volumeMounts:
+            - name: postgres-persistent-storage
+              mountPath: /var/lib/postgresql/data-init
+            - name: db-initialization
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: postgres-persistent-storage
+          persistentVolumeClaim:
+            claimName: ebs-postgres-claim
+        - name: db-initialization
+          configMap:
+            name: db-initialization-script
+            
+  volumeMounts:
+    - name:  db-data 
+      mountPath:  /var/lib/postgresql/data
+  volumes:
+    - name: db-data
+      emptyDir: {}
+
+status: {}
