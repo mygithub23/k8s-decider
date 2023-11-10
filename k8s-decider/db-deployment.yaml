@@ -19,7 +19,7 @@ spec:
       restartPolicy: Always    
       containers:
         - name: decider-db
-          image: madkar777/decider-db:v4
+          image: madkar777/decider-db:v5
           resources:
             requests:
               cpu: 100m
@@ -89,25 +89,36 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: WEB_HTTPS_ON
-                  name: env-configmap                    
+                  name: env-configmap    
+
           volumeMounts:
             - name: postgres-persistent-storage
-              mountPath: /var/lib/postgresql/data-init
-            - name: db-initialization
-              mountPath: /docker-entrypoint-initdb.d
+              mountPath: /var/lib/postgresql/data
       volumes:
         - name: postgres-persistent-storage
-          persistentVolumeClaim:
-            claimName: ebs-postgres-claim
-        - name: db-initialization
-          configMap:
-            name: db-initialization-script
-            
-  volumeMounts:
-    - name:  db-data 
-      mountPath:  /var/lib/postgresql/data
-  volumes:
-    - name: db-data
-      emptyDir: {}
-
+          persistentVolumeClaim: 
+            claimName: debs-postgres-claim     
 status: {}
+
+
+#           volumeMounts:
+#             - name: postgres-persistent-storage
+#               mountPath: /var/lib/postgresql/data-init
+#             - name: db-initialization
+#               mountPath: /docker-entrypoint-initdb.d
+#       volumes:
+#         - name: postgres-persistent-storage
+#           persistentVolumeClaim:
+#             claimName: ebs-postgres-claim
+#         - name: db-initialization
+#           configMap:
+#             name: db-initialization-script
+            
+#   volumeMounts:
+#     - name:  db-data 
+#       mountPath:  /var/lib/postgresql/data
+#   volumes:
+#     - name: db-data
+#       emptyDir: {}
+
+# status: {}
